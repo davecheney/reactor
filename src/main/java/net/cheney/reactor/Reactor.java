@@ -1,0 +1,125 @@
+package net.cheney.reactor;
+
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.spi.SelectorProvider;
+import java.util.Collection;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
+import static java.util.Collections.emptySet;
+
+public abstract class Reactor {
+	private static final Logger LOG = Logger.getLogger(Reactor.class);
+	
+	private final Selector selector;
+
+	protected Reactor() throws IOException {
+		selector = SelectorProvider.provider().openSelector();
+	}
+	
+	protected final <T extends SelectableChannel> T register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException {
+		channel.register(selector, ops, asyncChannel);
+		return channel;
+	}
+	
+	protected final void enableInterest(final AsyncChannel<?> channel, final int ops) {
+		final SelectionKey sk = channel.channel().keyFor(selector);
+		if(sk != null) {
+			enableInterest(sk, ops);
+		} else {
+			LOG.warn(String.format("Unable to enable ops %d, %s is not connected to %s", ops, channel.channel(), selector));
+		}
+	}
+	
+	protected final void disableInterest(final AsyncChannel<?> channel, final int ops) {
+		final SelectionKey sk = channel.channel().keyFor(selector);
+		if(sk != null) {
+			disableInterest(sk, ops);
+		} else {
+			LOG.warn(String.format("Unable to disable ops %d, %s is not connected to %s", ops, channel.channel(), selector));
+		}
+	}
+	
+	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
+	
+	protected abstract void disableInterest(final SelectionKey sk, int ops);
+
+	protected abstract void enableInterest(final SelectionKey sk, int ops);
+	
+	public abstract AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException;
+	
+	protected Set<SelectionKey> selectNow() throws IOException {
+		if (selector.select() > 0) {
+			return selector.selectedKeys();
+		} else {
+			return emptySet();
+		}
+	}
+
+	public final void connect(final SocketAddress addr, final ClientProtocolFactory factory) throws IOException {
+		final AsyncSocketChannel channel = newAsyncSocketChannel(factory);
+		channel.connect(addr);
+	}
+	
+	protected final void wakeup() {
+		selector.wakeup();
+	}
+
+	protected void doSelect() throws IOException {
+		final Collection<SelectionKey> keys = selectNow();
+		for (final SelectionKey key : keys) {
+			try {
+				handleSelectionKey(key);
+			} catch (Exception e) {
+				/**
+				 * Catch any unhandled exception at this point and close the
+				 * channel Errors and Throwables are not handled because they
+				 * represent something really broken with the JVM rather than
+				 * the individual connection
+				 */
+				LOG.error("Unhandled Exception in " + key.attachment(), e);
+				key.channel().close();
+				key.cancel();
+			}
+		}
+		keys.clear();
+	}
+
+	private final void handleSelectionKey(final SelectionKey key) throws IOException {
+		switch (key.readyOps()) {
+		case SelectionKey.OP_READ:
+			((AsyncByteChannel<?>) key.attachment()).doRead();
+			break;
+
+		case SelectionKey.OP_WRITE:
+			((AsyncByteChannel<?>) key.attachment()).doWrite();
+			break;
+
+		case SelectionKey.OP_READ | SelectionKey.OP_WRITE:
+			final AsyncByteChannel<?> channel = (AsyncByteChannel<?>) key.attachment();
+			channel.doRead();
+			if (key.isValid()) {
+				channel.doWrite();
+			}
+			break;
+
+		case SelectionKey.OP_ACCEPT:
+			((AsyncServerChannel) key.attachment()).onAccept();
+			break;
+
+		case SelectionKey.OP_CONNECT:
+			((AsyncSocketChannel) key.attachment()).onConnect();
+			break;
+
+		default:
+			LOG.error(String.format(
+					"Channel: %s Unhandled readyOps: %d",
+					key.channel(), key.readyOps()));
+		}		
+	}
+}
