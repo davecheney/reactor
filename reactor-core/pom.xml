@@ -4,21 +4,15 @@
 	<groupId>net.cheney.reactor</groupId>
 	<artifactId>reactor-core</artifactId>
 	<name>reactor-core</name>
-	<version>0.1</version>
+	<version>0.1-SNAPSHOT</version>
 	
 	<parent>
 		<groupId>net.cheney.reactor</groupId>
 		<artifactId>reactor</artifactId>
-		<version>1.0</version>
+		<version>0.1-SNAPSHOT</version>
 	</parent>
 	
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
