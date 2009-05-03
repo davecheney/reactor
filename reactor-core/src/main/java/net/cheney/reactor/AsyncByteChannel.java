@@ -20,9 +20,13 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 
 	public abstract void read(final ByteBuffer buff, final CompletionHandler<ByteBuffer> handler);
 	
+	public abstract void read(EventHandler<T> eventHandler);
+	
 	public abstract void write(final ByteBuffer buff, final CompletionHandler<ByteBuffer> handler); 
 	
 	public abstract void write(final ByteBuffer[] buffs, final CompletionHandler<ByteBuffer[]> handler);
+	
+	public abstract void write(EventHandler<T> eventHandler);
 	
 	public final void write(final ByteBuffer... buffers) {
 		write(buffers, NULL_WRITE_HANDLER);

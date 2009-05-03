@@ -64,8 +64,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				return false;
 			}
 		}
-
-		pendingReads.add(new ReadEventHandler());
+		
+		read(new ReadEventHandler());
+	}
+	
+	@Override
+	public final void read(EventHandler<SocketChannel> eventHandler) {
+		pendingReads.add(eventHandler);
 		enableReadInterest();
 	}
 
@@ -104,12 +109,11 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			}
 		}
 		
-		pendingWrites.add(new WriteEventHandler());
-		enableWriteInterest();
+		write(new WriteEventHandler());
 	}
 
 	@Override
-	public void write(final ByteBuffer[] buffs, final CompletionHandler<ByteBuffer[]> handler) {
+	public final void write(final ByteBuffer[] buffs, final CompletionHandler<ByteBuffer[]> handler) {
 		final class WriteEventHandler implements EventHandler<SocketChannel> {
 			
 			final class WriteEventCompletedHandler implements Runnable {
@@ -130,7 +134,12 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			}
 		}
 		
-		pendingWrites.add(new WriteEventHandler());
+		write(new WriteEventHandler());
+	}
+	
+	@Override
+	public final void write(EventHandler<SocketChannel> eventHandler) {
+		pendingWrites.add(eventHandler);
 		enableWriteInterest();
 	}
 }

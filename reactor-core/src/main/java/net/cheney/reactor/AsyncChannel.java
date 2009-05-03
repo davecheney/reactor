@@ -5,6 +5,12 @@ import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
 public abstract class AsyncChannel<T extends SelectableChannel> implements Closeable {
+	
+	public interface CompletionHandler<T> {
+
+		void completed(T result);
+		
+	}
 
 	private final T channel;
 	private final Reactor reactor;
@@ -28,8 +34,5 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 		return this.reactor;
 	}
 	
-	public interface CompletionHandler<T> {
 
-		void completed(T result);
-	}
 }
