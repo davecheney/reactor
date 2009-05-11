@@ -14,8 +14,8 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 		};
 	};
 	
-	protected AsyncByteChannel(final Reactor reactor, final T channel) throws IOException {
-		super(reactor, channel);
+	protected AsyncByteChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
+		super(reactor, channel, ops);
 	}
 
 	public abstract void read(final ByteBuffer buff, final CompletionHandler<ByteBuffer> handler);

@@ -15,17 +15,17 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 	private final ServerProtocolFactory factory;
 
 	protected AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
-		super(reactor, createServerSocketChannel());
+		super(reactor, createServerSocketChannel(), SelectionKey.OP_ACCEPT);
 		this.factory = factory;
 	}
 	
 	protected AsyncServerChannel listen(final SocketAddress addr) throws IOException {
 		channel().socket().bind(addr);
-		enableAcceptInterest();
+//		enableAcceptInterest(); 
 		return this;
 	}
 	
-	protected final static ServerSocketChannel createServerSocketChannel() throws IOException {
+	final static ServerSocketChannel createServerSocketChannel() throws IOException {
 		final ServerSocketChannel ssc = SelectorProvider.provider().openServerSocketChannel();
 		final ServerSocket socket = ssc.socket();
 		socket.setReuseAddress(true);
@@ -41,8 +41,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 		final SocketChannel sc = channel().accept();
 		if(sc != null) {
 			setSocketParameters(sc.socket());
-			final AsyncSocketChannel channel = createAsyncSocketChannel(sc);
-			factory().completed(channel);
+			factory().completed(createAsyncSocketChannel(sc));
 		}		
 	}
 	
@@ -51,7 +50,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 		socket.setTcpNoDelay(true);
 	}
 
-	protected abstract AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException;
+	abstract AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException;
 
 	public final void enableAcceptInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_ACCEPT);

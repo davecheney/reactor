@@ -6,20 +6,14 @@ import java.nio.channels.SelectableChannel;
 
 public abstract class AsyncChannel<T extends SelectableChannel> implements Closeable {
 	
-	public interface CompletionHandler<T> {
-
-		void completed(T result);
-		
-	}
-
 	private final T channel;
 	private final Reactor reactor;
 
-	protected AsyncChannel(final Reactor reactor, final T channel) throws IOException {
+	protected AsyncChannel(final Reactor reactor, final T channel, int ops) throws IOException {
 		this.channel = channel;
 		this.reactor = reactor;
 		channel.configureBlocking(false);
-		reactor().register(channel, 0, this);
+		reactor().register(channel, ops, this);
 	}
 	
 	public final void close() throws IOException {
@@ -30,7 +24,7 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 		return this.channel;
 	}
 	
-	protected final Reactor reactor() {
+	final Reactor reactor() {
 		return this.reactor;
 	}
 	

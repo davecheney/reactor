@@ -18,16 +18,15 @@ public abstract class Reactor {
 	
 	private final Selector selector;
 
-	protected Reactor() throws IOException {
+	Reactor() throws IOException {
 		selector = SelectorProvider.provider().openSelector();
 	}
 	
-	protected final <T extends SelectableChannel> T register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException {
-		channel.register(selector, ops, asyncChannel);
-		return channel;
+	final Selector selector() {
+		return selector;
 	}
 	
-	protected final void enableInterest(final AsyncChannel<?> channel, final int ops) {
+	final void enableInterest(final AsyncChannel<?> channel, final int ops) {
 		final SelectionKey sk = channel.channel().keyFor(selector);
 		if(sk != null) {
 			enableInterest(sk, ops);
@@ -36,7 +35,9 @@ public abstract class Reactor {
 		}
 	}
 	
-	protected final void disableInterest(final AsyncChannel<?> channel, final int ops) {
+	protected abstract void enableInterest(final SelectionKey sk, int ops);
+	
+	final void disableInterest(final AsyncChannel<?> channel, final int ops) {
 		final SelectionKey sk = channel.channel().keyFor(selector);
 		if(sk != null) {
 			disableInterest(sk, ops);
@@ -44,16 +45,16 @@ public abstract class Reactor {
 			LOG.warn(String.format("Unable to disable ops %d, %s is not connected to %s", ops, channel.channel(), selector));
 		}
 	}
+
+	abstract void disableInterest(final SelectionKey sk, int ops);
 	
 	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
 	
-	protected abstract void disableInterest(final SelectionKey sk, int ops);
-
-	protected abstract void enableInterest(final SelectionKey sk, int ops);
+	abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException;
 	
 	public abstract AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException;
 	
-	protected Set<SelectionKey> selectNow() throws IOException {
+	Set<SelectionKey> selectNow() throws IOException {
 		if (selector.select() > 0) {
 			return selector.selectedKeys();
 		} else {
@@ -66,7 +67,7 @@ public abstract class Reactor {
 		channel.connect(addr);
 	}
 	
-	protected final void wakeup() {
+	final void wakeup() {
 		selector.wakeup();
 	}
 
@@ -122,4 +123,5 @@ public abstract class Reactor {
 					key.channel(), key.readyOps()));
 		}		
 	}
+
 }

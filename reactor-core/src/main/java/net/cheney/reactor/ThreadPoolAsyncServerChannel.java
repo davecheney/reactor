@@ -20,7 +20,7 @@ public final class ThreadPoolAsyncServerChannel extends AsyncServerChannel {
 	}
 	
 	@Override
-	protected final AsyncSocketChannel createAsyncSocketChannel(final SocketChannel sc) throws IOException {
+	final AsyncSocketChannel createAsyncSocketChannel(final SocketChannel sc) throws IOException {
 		return new ThreadPoolAsyncSocketChannel(reactor(), sc, executor);
 	}
 

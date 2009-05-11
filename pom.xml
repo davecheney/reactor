@@ -1,5 +1,13 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>net.cheney</groupId>
+		<artifactId>net-cheney-public-pom</artifactId>
+		<version>1</version>
+	</parent>
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.cheney.reactor</groupId>
 	<artifactId>reactor</artifactId>
@@ -9,11 +17,15 @@
 
 	<modules>
 		<module>reactor-core</module>
+		<module>reactor-test-runner</module>
 	</modules>
 
 	<scm>
-		<connection>scm:svn:svn://svn.cheney.net/public/reactor/trunk</connection>
-		<developerConnection>scm:svn:svn://svn.cheney.net/public/reactor/trunk</developerConnection>
+		<connection>scm:svn:svn://svn.cheney.net/public/reactor/trunk
+		</connection>
+		<developerConnection>
+			scm:svn:svn://svn.cheney.net/public/reactor/trunk
+		</developerConnection>
 	</scm>
 	<dependencies>
 		<dependency>
@@ -55,50 +67,5 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<properties>
-		<maven.compile.source>1.5</maven.compile.source>
-		<maven.compile.target>1.5</maven.compile.target>
-		<project.build.sourceEncoding>UTF-8
-		</project.build.sourceEncoding>
-		<maven.jar.index>true</maven.jar.index>
-	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${maven.compile.source}</source>
-					<target>${maven.compile.target}</target>
-					<encoding>${project.build.sourceEncoding}
-					</encoding>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-	<profiles>
-		<profile>
-			<id>ide</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-idea-plugin</artifactId>
-						<configuration>
-							<downloadSources>true</downloadSources>
-							<downloadJavadocs>true</downloadJavadocs>
-						</configuration>
-					</plugin>
-					<plugin>
-						<artifactId>maven-eclipse-plugin</artifactId>
-						<configuration>
-							<downloadSources>true</downloadSources>
-							<downloadJavadocs>true</downloadJavadocs>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 
 </project>

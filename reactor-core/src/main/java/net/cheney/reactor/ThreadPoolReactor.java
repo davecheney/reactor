@@ -3,6 +3,8 @@ package net.cheney.reactor;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.util.Queue;
 import java.util.Set;
@@ -49,7 +51,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	@Override
-	protected Set<SelectionKey> selectNow() throws IOException {
+	final Set<SelectionKey> selectNow() throws IOException {
 		try {
 			selectorlock.lock();
 			return super.selectNow();
@@ -58,16 +60,48 @@ public final class ThreadPoolReactor extends Reactor {
 		}
 	}
 	
-	private final void invokeLater(Runnable r) {
+	@Override
+	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException {
+		if(queuelock.tryLock()) {
+			try {
+				registerNow(channel, ops, asyncChannel);
+			} finally {
+				queuelock.unlock();
+			}
+		} else {
+			registerLater(channel, ops, asyncChannel);
+		}
+	}
+	
+	private final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws ClosedChannelException {
+		channel.register(selector(), ops, asyncChannel);
+	}
+	
+	private final <T extends SelectableChannel> void registerLater(final T channel, final int ops, final AsyncChannel<?> asyncChannel) {
+		invokeLater(new Runnable() {
+			public void run() {
+				try {
+					registerNow(channel, ops, asyncChannel);
+				} catch (ClosedChannelException e) {
+					LOG.error(String.format("Unable to register channel %s, with ops %d", channel, ops));
+				}
+			}
+		});
+	}
+
+	private final void invokeLater(final Runnable r) {
 		pendingInvocations.add(r);
 		wakeup();
 	}
-
+	
 	@Override
 	protected final void enableInterest(final SelectionKey sk, final int op) {
 		if (queuelock.tryLock()) {
-			enableInterestNow(sk, op);
-			queuelock.unlock();
+			try {
+				enableInterestNow(sk, op);
+			} finally {
+				queuelock.unlock();
+			}
 		} else {
 			enableInterestLater(sk, op);
 		}
@@ -90,10 +124,13 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	@Override
-	protected final void disableInterest(SelectionKey sk, int op) {
+	final void disableInterest(final SelectionKey sk, final int op) {
 		if (queuelock.tryLock()) {
-			disableInterestNow(sk, op);
-			queuelock.unlock();
+			try {
+				disableInterestNow(sk, op);
+			} finally {
+				queuelock.unlock();
+			}
 		} else {
 			disableInterestLater(sk, op);
 		}

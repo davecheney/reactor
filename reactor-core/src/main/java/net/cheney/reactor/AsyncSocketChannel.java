@@ -10,8 +10,8 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 	
 	private final ClientProtocolFactory factory;
 
-	protected AsyncSocketChannel(final Reactor reactor, final SocketChannel channel, final ClientProtocolFactory factory) throws IOException {
-		super(reactor, channel);
+	protected AsyncSocketChannel(final Reactor reactor, final SocketChannel channel, final ClientProtocolFactory factory, final int ops) throws IOException {
+		super(reactor, channel, ops);
 		this.factory = factory;
 	}
 	
@@ -38,6 +38,6 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 
 	public final void connect(final SocketAddress addr) throws IOException {
 		channel().connect(addr);
-		enableConnectInterest();
+//		enableConnectInterest();
 	}
 }

@@ -2,6 +2,7 @@ package net.cheney.reactor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,12 +15,12 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 	private final ExecutorService executor;
 
 	ThreadPoolAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory, final ExecutorService executor) throws IOException {
-		super(reactor, SocketChannel.open(), factory);
+		super(reactor, SocketChannel.open(), factory, SelectionKey.OP_CONNECT);
 		this.executor = executor;
 	}
 
 	ThreadPoolAsyncSocketChannel(final Reactor reactor, final SocketChannel sc, final ExecutorService executor) throws IOException {
-		super(reactor, sc, null);
+		super(reactor, sc, null, 0);
 		this.executor = executor;
 	}
 
@@ -47,7 +48,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				
 			}
 			
-			public boolean handleEvent(SocketChannel channel)
+			public boolean handleEvent(final SocketChannel channel)
 					throws IOException {
 				switch (channel.read(buff)) {
 				case -1:
@@ -69,7 +70,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 	}
 	
 	@Override
-	public final void read(EventHandler<SocketChannel> eventHandler) {
+	public final void read(final EventHandler<SocketChannel> eventHandler) {
 		pendingReads.add(eventHandler);
 		enableReadInterest();
 	}
@@ -99,7 +100,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				
 			}
 			
-			public boolean handleEvent(SocketChannel channel) throws IOException {
+			public boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buff);
 				if (!buff.hasRemaining()) {
 					executor.execute(new WriteEventCompletedHandler());
@@ -124,7 +125,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				
 			}
 			
-			public boolean handleEvent(SocketChannel channel) throws IOException {
+			public boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buffs, 0, buffs.length);
 				if (!buffs[buffs.length - 1].hasRemaining()) {
 					executor.execute(new WriteEventCompletedHandler());
@@ -138,7 +139,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 	}
 	
 	@Override
-	public final void write(EventHandler<SocketChannel> eventHandler) {
+	public final void write(final EventHandler<SocketChannel> eventHandler) {
 		pendingWrites.add(eventHandler);
 		enableWriteInterest();
 	}
