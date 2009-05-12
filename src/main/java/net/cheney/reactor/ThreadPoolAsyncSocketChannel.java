@@ -42,14 +42,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			
 			final class ReadEventCompletedHandler implements Runnable {
 
-				public void run() {
+				public final void run() {
 					handler.completed(buff);
 				}
 				
 			}
 			
-			public boolean handleEvent(final SocketChannel channel)
-					throws IOException {
+			public final boolean handleEvent(final SocketChannel channel) throws IOException {
 				switch (channel.read(buff)) {
 				case -1:
 					close();
@@ -94,13 +93,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			
 			final class WriteEventCompletedHandler implements Runnable {
 
-				public void run() {
+				public final void run() {
 					handler.completed(buff);
 				}
 				
 			}
 			
-			public boolean handleEvent(final SocketChannel channel) throws IOException {
+			public final boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buff);
 				if (!buff.hasRemaining()) {
 					executor.execute(new WriteEventCompletedHandler());
@@ -119,13 +118,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			
 			final class WriteEventCompletedHandler implements Runnable {
 
-				public void run() {
+				public final void run() {
 					handler.completed(buffs);
 				}
 				
 			}
 			
-			public boolean handleEvent(final SocketChannel channel) throws IOException {
+			public final boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buffs, 0, buffs.length);
 				if (!buffs[buffs.length - 1].hasRemaining()) {
 					executor.execute(new WriteEventCompletedHandler());
