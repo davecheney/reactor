@@ -118,9 +118,7 @@ public abstract class Reactor {
 			break;
 
 		default:
-			LOG.error(String.format(
-					"Channel: %s Unhandled readyOps: %d",
-					key.channel(), key.readyOps()));
+//			LOG.error(String.format("Channel: %s Unhandled readyOps: %d",key.channel(), key.readyOps()));
 		}		
 	}
 

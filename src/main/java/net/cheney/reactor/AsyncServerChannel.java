@@ -14,7 +14,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 
 	private final ServerProtocolFactory factory;
 
-	protected AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
+	AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
 		super(reactor, createServerSocketChannel(), SelectionKey.OP_ACCEPT);
 		this.factory = factory;
 	}
