@@ -61,7 +61,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	@Override
-	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException {
+	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws ClosedChannelException {
 		if(queuelock.tryLock()) {
 			try {
 				registerNow(channel, ops, asyncChannel);
