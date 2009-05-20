@@ -76,6 +76,9 @@ public abstract class Reactor {
 		for (final SelectionKey key : keys) {
 			try {
 				handleSelectionKey(key);
+			} catch (IOException e) {
+				LOG.error("IOException in " + key.attachment(), e);
+				key.cancel(); key.channel().close();
 			} catch (Exception e) {
 				/**
 				 * Catch any unhandled exception at this point and close the
