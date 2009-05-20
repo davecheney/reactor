@@ -92,7 +92,7 @@ public abstract class Reactor {
 	}
 
 	private final void handleSelectionKey(final SelectionKey key) throws IOException {
-		switch (key.readyOps()) {
+		switch (key.readyOps() & (SelectionKey.OP_READ | SelectionKey.OP_WRITE)) {
 		case SelectionKey.OP_READ:
 			((AsyncByteChannel<?>) key.attachment()).doRead();
 			break;
@@ -108,21 +108,14 @@ public abstract class Reactor {
 				channel.doWrite();
 			}
 			break;
-
-		case SelectionKey.OP_ACCEPT:
+		}
+		
+		if(key.isAcceptable()) {
 			((AsyncServerChannel) key.attachment()).onAccept();
-			break;
-
-		case SelectionKey.OP_CONNECT:
+		}
+		
+		if(key.isConnectable()) {
 			((AsyncSocketChannel) key.attachment()).onConnect();
-			break;
-			
-		case 0:
-			// wtf, readyOps should never return 0 ops ready ...
-			break;
-
-		default:
-			LOG.error(String.format("Channel: %s interestOps: %d Unhandled readyOps: %d",key.channel(), key.interestOps(), key.readyOps()));
 		}		
 	}
 
