@@ -54,16 +54,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				switch (channel.read(buff)) {
 				case -1:
 					close();
-					break;
-
 				case 0:
-					break;
+					return false;
 
 				default:
 					executor.execute(readEventCompletedHandler);
 					return true;
 				}
-				return false;
 			}
 		}
 		

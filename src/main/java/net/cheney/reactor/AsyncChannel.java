@@ -17,7 +17,7 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 	}
 	
 	public final void close() throws IOException {
-		channel.keyFor(reactor.selector()).cancel();
+		channel.keyFor(reactor().selector()).cancel();
 		channel.close();
 	}
 	
