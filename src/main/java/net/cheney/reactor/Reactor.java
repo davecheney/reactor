@@ -116,9 +116,13 @@ public abstract class Reactor {
 		case SelectionKey.OP_CONNECT:
 			((AsyncSocketChannel) key.attachment()).onConnect();
 			break;
+			
+		case 0:
+			// wtf, readyOps should never return 0 ops ready ...
+			break;
 
 		default:
-//			LOG.error(String.format("Channel: %s Unhandled readyOps: %d",key.channel(), key.readyOps()));
+			LOG.error(String.format("Channel: %s interestOps: %d Unhandled readyOps: %d",key.channel(), key.interestOps(), key.readyOps()));
 		}		
 	}
 
