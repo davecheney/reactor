@@ -51,4 +51,9 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 	protected final void enableWriteInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_WRITE);
 	}
+	
+	@Override
+	public final String toString() {
+		return super.toString()+"["+channel()+"]";
+	}
 }
