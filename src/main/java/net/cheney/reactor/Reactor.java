@@ -118,17 +118,8 @@ public abstract class Reactor {
 		case SelectionKey.OP_CONNECT:
 			((AsyncSocketChannel) key.attachment()).onConnect();
 			break;
-			
-		case SelectionKey.OP_CONNECT | SelectionKey.OP_READ:
-			((AsyncSocketChannel) key.attachment()).onConnect();
-			((AsyncByteChannel<?>) key.attachment()).doRead();
-			break;
-			
-		case SelectionKey.OP_CONNECT | SelectionKey.OP_READ | SelectionKey.OP_WRITE:
-			((AsyncByteChannel<?>) key.attachment()).doRead();
-			if (key.isValid()) {
-				((AsyncByteChannel<?>) key.attachment()).doWrite();
-			}
+
+		case 0:
 			break;
 			
 		default:

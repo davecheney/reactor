@@ -6,7 +6,10 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import org.apache.log4j.Logger;
+
 public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel> {
+	private static final Logger LOG = Logger.getLogger(AsyncSocketChannel.class);
 	
 	private final ClientProtocolFactory factory;
 
@@ -30,10 +33,18 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 	public final Socket socket() {
 		return channel().socket();
 	}
+	
+	protected final ClientProtocolFactory factory() {
+		return this.factory;
+	}
 
 	public final void onConnect() throws IOException {
-		channel().finishConnect();
-		this.factory.completed(this);
+		if (channel().finishConnect()) {
+			reactor().disableInterest(this, SelectionKey.OP_CONNECT);
+			factory().completed(this);
+		} else {
+			LOG.warn(String.format("%s failed to finishConnect()", channel()));
+		}
 	}
 
 	public final void connect(final SocketAddress addr) throws IOException {
