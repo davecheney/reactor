@@ -14,7 +14,7 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 		};
 	};
 	
-	protected AsyncByteChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
+	AsyncByteChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
 		super(reactor, channel, ops);
 	}
 
@@ -36,19 +36,19 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 
 	public abstract void doRead() throws IOException;
 	
-	protected final void disableReadInterest() {
+	final void disableReadInterest() {
 		reactor().disableInterest(this, SelectionKey.OP_READ);
 	}
 
-	protected final void enableReadInterest() {
+	final void enableReadInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_READ);
 	}
 	
-	protected final void disableWriteInterest() {
+	final void disableWriteInterest() {
 		reactor().disableInterest(this, SelectionKey.OP_WRITE);
 	}
 	
-	protected final void enableWriteInterest() {
+	final void enableWriteInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_WRITE);
 	}
 	

@@ -47,8 +47,8 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 		}
 	}
 
-	public final void connect(final SocketAddress addr) throws IOException {
+	final void connect(final SocketAddress addr) throws IOException {
 		channel().connect(addr);
-//		enableConnectInterest();
+		enableConnectInterest();
 	}
 }

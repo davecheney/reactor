@@ -30,7 +30,7 @@ public abstract class Reactor {
 		enableInterest(channel.channel(), ops);
 	}
 	
-	protected abstract void enableInterest(final SelectableChannel sc, int ops);
+	abstract void enableInterest(final SelectableChannel sc, int ops);
 	
 	final void disableInterest(final AsyncChannel<?> channel, final int ops) {
 		disableInterest(channel.channel(), ops);
@@ -109,11 +109,8 @@ public abstract class Reactor {
 			((AsyncSocketChannel) key.attachment()).onConnect();
 			break;
 
-		case 0:
-			break;
-			
 		default:
-			LOG.error(String.format("Channel: %s interestOps: %d Unhandled readyOps: %d",key.channel(), key.interestOps(), key.readyOps()));
+			LOG.error(String.format("Channel: %s [%s] interestOps: %d Unhandled readyOps: %d",key.channel(), key.attachment(), key.interestOps(), key.readyOps()));
 		}		
 	}
 

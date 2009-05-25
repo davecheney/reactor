@@ -95,31 +95,33 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	@Override
-	protected final void enableInterest(final SelectionKey sk, final int op) {
+	protected final void enableInterest(final SelectableChannel sc, final int op) {
 		if (queuelock.tryLock()) {
 			try {
-				enableInterestNow(sk, op);
+				enableInterestNow(sc, op);
 			} finally {
 				queuelock.unlock();
 			}
 		} else {
-			enableInterestLater(sk, op);
+			enableInterestLater(sc, op);
 		}
 	}
 
-	private final void enableInterestLater(final SelectionKey sk, final int op) {
+	private final void enableInterestLater(final SelectableChannel sc, final int op) {
 		invokeLater(new Runnable() {
 			public void run() {
-				enableInterestNow(sk, op);
+				enableInterestNow(sc, op); 
 			};
 		});
 	}
-	
-	private final void enableInterestNow(SelectionKey sk, int ops) {
+	 
+	private final void enableInterestNow(final SelectableChannel sc, int ops) {
+		final SelectionKey sk = sc.keyFor(selector());
+		assert sk != null : "channel _must_ be registered with this selector";
 		try {
 			sk.interestOps(sk.interestOps() | ops);
 		} catch (CancelledKeyException e) {
-			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sk.channel()));
+			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
 		}
 	}
 
@@ -146,11 +148,11 @@ public final class ThreadPoolReactor extends Reactor {
 
 	private final void disableInterestNow(final SelectableChannel sc, int ops) {
 		final SelectionKey sk = sc.keyFor(selector());
+		assert sk != null : "channel _must_ be registered with this selector";
 		try {
-			assert(sk != null); // channel _must_ be registered with this selector
 			sk.interestOps(sk.interestOps() & ~ops);
 		} catch (CancelledKeyException e) {
-			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sk.channel()));
+			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
 		}
 	}
 

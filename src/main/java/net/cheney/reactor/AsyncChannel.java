@@ -9,7 +9,7 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 	private final T channel;
 	private final Reactor reactor;
 
-	protected AsyncChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
+	AsyncChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
 		this.channel = channel;
 		this.reactor = reactor;
 		channel.configureBlocking(false);
