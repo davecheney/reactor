@@ -2,6 +2,8 @@ package net.cheney.reactor;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -38,12 +40,17 @@ public abstract class Reactor {
 
 	abstract void disableInterest(final SelectableChannel sc, int ops);
 	
-	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
+	abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
 	
-	abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws IOException;
+	abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException;
 	
-	public abstract AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException;
+	public final AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException {
+		final AsyncServerChannel channel = newAsyncServerChannel(factory);
+		return channel.listen(addr);
+	}
 	
+	abstract AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException;
+
 	Set<SelectionKey> selectNow() throws IOException {
 		if (selector.select() > 0) {
 			return selector.selectedKeys();
@@ -114,4 +121,33 @@ public abstract class Reactor {
 		}		
 	}
 
+	final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
+		channel.register(selector(), ops, asyncChannel);
+		LOG.info(String.format("Channel [%s] now registered on [%s]", channel, selector()));
+	}
+
+	final void enableInterestNow(final SelectableChannel sc, int ops) {
+		final SelectionKey sk = sc.keyFor(selector());
+		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
+		try {
+			sk.interestOps(sk.interestOps() | ops);
+		} catch (CancelledKeyException e) {
+			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
+		}
+	}
+
+	final void disableInterestNow(final SelectableChannel sc, int ops) {
+		final SelectionKey sk = sc.keyFor(selector());
+		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
+		try {
+			sk.interestOps(sk.interestOps() & ~ops);
+		} catch (CancelledKeyException e) {
+			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
+		}
+	}
+	
+	public abstract void start();
+	
+	public abstract void stop();
+	
 }

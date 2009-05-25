@@ -1,13 +1,10 @@
 package net.cheney.reactor;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
-import java.nio.channels.SelectionKey;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,13 +42,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	@Override
-	public final AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException {
-		final ThreadPoolAsyncServerChannel channel = new ThreadPoolAsyncServerChannel(this, factory, executor);
-		return channel.listen(addr);
-	}
-	
-	@Override
-	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws ClosedChannelException {
+	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
 		if(queuelock.tryLock()) {
 			try {
 				registerNow(channel, ops, asyncChannel);
@@ -63,11 +54,12 @@ public final class ThreadPoolReactor extends Reactor {
 		}
 	}
 	
-	private final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws ClosedChannelException {
-		channel.register(selector(), ops, asyncChannel);
+	@Override
+	AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException {
+		return new ThreadPoolAsyncServerChannel(this, factory, executor);
 	}
 	
-	private final <T extends SelectableChannel> void registerLater(final T channel, final int ops, final AsyncChannel<?> asyncChannel) {
+	private final <T extends SelectableChannel> void registerLater(final T channel, final int ops, final AsyncChannel<T> asyncChannel) {
 		invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -105,16 +97,6 @@ public final class ThreadPoolReactor extends Reactor {
 		});
 	}
 	 
-	private final void enableInterestNow(final SelectableChannel sc, int ops) {
-		final SelectionKey sk = sc.keyFor(selector());
-		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
-		try {
-			sk.interestOps(sk.interestOps() | ops);
-		} catch (CancelledKeyException e) {
-			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
-		}
-	}
-
 	@Override
 	final void disableInterest(final SelectableChannel sc, final int op) {
 		if (queuelock.tryLock()) {
@@ -134,16 +116,6 @@ public final class ThreadPoolReactor extends Reactor {
 				disableInterestNow(sc, op);
 			};
 		});
-	}
-
-	private final void disableInterestNow(final SelectableChannel sc, int ops) {
-		final SelectionKey sk = sc.keyFor(selector());
-		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
-		try {
-			sk.interestOps(sk.interestOps() & ~ops);
-		} catch (CancelledKeyException e) {
-			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
-		}
 	}
 
 	@Override

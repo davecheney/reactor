@@ -1,5 +1,7 @@
 package net.cheney.reactor;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,18 +12,22 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+import org.apache.log4j.Logger;
+
 public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChannel> {
+	private static final Logger LOG = Logger.getLogger(AsyncServerChannel.class);
 
 	private final ServerProtocolFactory factory;
 
 	AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
-		super(reactor, createServerSocketChannel(), SelectionKey.OP_ACCEPT);
+		super(reactor, createServerSocketChannel(), 0);
 		this.factory = factory;
 	}
 	
 	protected AsyncServerChannel listen(final SocketAddress addr) throws IOException {
 		channel().socket().bind(addr);
-//		enableAcceptInterest(); 
+		enableAcceptInterest(); 
+		LOG.info(format("%s listening on %s", this, channel().socket()));
 		return this;
 	}
 	

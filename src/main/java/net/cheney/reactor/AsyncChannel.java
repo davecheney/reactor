@@ -6,23 +6,23 @@ import java.nio.channels.SelectableChannel;
 
 public abstract class AsyncChannel<T extends SelectableChannel> implements Closeable {
 	
-	private final T channel;
+	private final T sc;
 	private final Reactor reactor;
 
-	AsyncChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
-		this.channel = channel;
+	AsyncChannel(final Reactor reactor, final T sc, final int ops) throws IOException {
+		this.sc = sc;
 		this.reactor = reactor;
-		channel.configureBlocking(false);
-		reactor().register(channel, ops, this);
+		sc.configureBlocking(false);
+		reactor().register(sc, ops, this);
 	}
 	
 	public final void close() throws IOException {
-		channel.keyFor(reactor().selector()).cancel();
-		channel.close();
+		sc.keyFor(reactor().selector()).cancel();
+		sc.close();
 	}
 	
 	protected final T channel() {
-		return this.channel;
+		return this.sc;
 	}
 	
 	final Reactor reactor() {
