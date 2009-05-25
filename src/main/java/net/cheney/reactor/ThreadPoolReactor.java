@@ -51,16 +51,6 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	@Override
-	final Set<SelectionKey> selectNow() throws IOException {
-		try {
-			selectorlock.lock();
-			return super.selectNow();
-		} finally {
-			selectorlock.unlock();
-		}
-	}
-	
-	@Override
 	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<?> asyncChannel) throws ClosedChannelException {
 		if(queuelock.tryLock()) {
 			try {
@@ -117,7 +107,7 @@ public final class ThreadPoolReactor extends Reactor {
 	 
 	private final void enableInterestNow(final SelectableChannel sc, int ops) {
 		final SelectionKey sk = sc.keyFor(selector());
-		assert sk != null : "channel _must_ be registered with this selector";
+		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		try {
 			sk.interestOps(sk.interestOps() | ops);
 		} catch (CancelledKeyException e) {
@@ -148,7 +138,7 @@ public final class ThreadPoolReactor extends Reactor {
 
 	private final void disableInterestNow(final SelectableChannel sc, int ops) {
 		final SelectionKey sk = sc.keyFor(selector());
-		assert sk != null : "channel _must_ be registered with this selector";
+		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		try {
 			sk.interestOps(sk.interestOps() & ~ops);
 		} catch (CancelledKeyException e) {
@@ -173,7 +163,16 @@ public final class ThreadPoolReactor extends Reactor {
 	@Override
 	public final void doSelect() throws IOException {
 		doPendingInvocations();
-		super.doSelect();
+		try {
+			// The selector lock has to be held during the whole of the doSelect() method 
+			// as the event handlers may try to change the interest set of a key which
+			// is in the pending queue to be registered, yet because the selectorlock
+			// is not held they are able to execute ahead of the registration
+			selectorlock.lock();
+			super.doSelect();
+		} finally {
+			selectorlock.unlock();
+		}
 	}
 	
 	private final void doPendingInvocations() {
