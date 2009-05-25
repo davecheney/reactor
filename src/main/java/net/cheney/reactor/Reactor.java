@@ -27,26 +27,16 @@ public abstract class Reactor {
 	}
 	
 	final void enableInterest(final AsyncChannel<?> channel, final int ops) {
-		final SelectionKey sk = channel.channel().keyFor(selector);
-		if(sk != null) {
-			enableInterest(sk, ops);
-		} else {
-			LOG.warn(String.format("Unable to enable ops %d, %s is not connected to %s", ops, channel.channel(), selector));
-		}
+		enableInterest(channel.channel(), ops);
 	}
 	
-	protected abstract void enableInterest(final SelectionKey sk, int ops);
+	protected abstract void enableInterest(final SelectableChannel sc, int ops);
 	
 	final void disableInterest(final AsyncChannel<?> channel, final int ops) {
-		final SelectionKey sk = channel.channel().keyFor(selector);
-		if(sk != null) {
-			disableInterest(sk, ops);
-		} else {
-			LOG.warn(String.format("Unable to disable ops %d, %s is not connected to %s", ops, channel.channel(), selector));
-		}
+		disableInterest(channel.channel(), ops);
 	}
 
-	abstract void disableInterest(final SelectionKey sk, int ops);
+	abstract void disableInterest(final SelectableChannel sc, int ops);
 	
 	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
 	

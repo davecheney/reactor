@@ -124,28 +124,30 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	@Override
-	final void disableInterest(final SelectionKey sk, final int op) {
+	final void disableInterest(final SelectableChannel sc, final int op) {
 		if (queuelock.tryLock()) {
 			try {
-				disableInterestNow(sk, op);
+				disableInterestNow(sc, op);
 			} finally {
 				queuelock.unlock();
 			}
 		} else {
-			disableInterestLater(sk, op);
+			disableInterestLater(sc, op);
 		}
 	}
 
-	private final void disableInterestLater(final SelectionKey sk, final int op) {
+	private final void disableInterestLater(final SelectableChannel sc, final int op) {
 		invokeLater(new Runnable() {
 			public void run() {
-				disableInterestNow(sk, op);
+				disableInterestNow(sc, op);
 			};
 		});
 	}
 
-	private final void disableInterestNow(SelectionKey sk, int ops) {
+	private final void disableInterestNow(final SelectableChannel sc, int ops) {
+		final SelectionKey sk = sc.keyFor(selector());
 		try {
+			assert(sk != null); // channel _must_ be registered with this selector
 			sk.interestOps(sk.interestOps() & ~ops);
 		} catch (CancelledKeyException e) {
 			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sk.channel()));
