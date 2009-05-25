@@ -2,6 +2,7 @@ package net.cheney.reactor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,7 +15,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 	private final ExecutorService executor;
 
 	ThreadPoolAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory, final ExecutorService executor) throws IOException {
-		super(reactor, SocketChannel.open(), factory, 0);
+		super(reactor, SocketChannel.open(), factory, SelectionKey.OP_CONNECT);
 		this.executor = executor;
 	}
 
