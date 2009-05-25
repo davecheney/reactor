@@ -43,15 +43,15 @@ public final class ThreadPoolReactor extends Reactor {
 
 	@Override
 	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
-		if(queuelock.tryLock()) {
-			try {
-				registerNow(channel, ops, asyncChannel);
-			} finally {
-				queuelock.unlock();
-			}
-		} else {
+//		if(queuelock.tryLock()) {
+//			try {
+//				registerNow(channel, ops, asyncChannel);
+//			} finally {
+//				queuelock.unlock();
+//			}
+//		} else {
 			registerLater(channel, ops, asyncChannel);
-		}
+//		}
 	}
 	
 	@Override
@@ -78,15 +78,15 @@ public final class ThreadPoolReactor extends Reactor {
 	
 	@Override
 	protected final void enableInterest(final SelectableChannel sc, final int op) {
-		if (queuelock.tryLock()) {
-			try {
-				enableInterestNow(sc, op);
-			} finally {
-				queuelock.unlock();
-			}
-		} else {
+//		if (queuelock.tryLock()) {
+//			try {
+//				enableInterestNow(sc, op);
+//			} finally {
+//				queuelock.unlock();
+//			}
+//		} else {
 			enableInterestLater(sc, op);
-		}
+//		}
 	}
 
 	private final void enableInterestLater(final SelectableChannel sc, final int op) {
@@ -99,15 +99,15 @@ public final class ThreadPoolReactor extends Reactor {
 	 
 	@Override
 	final void disableInterest(final SelectableChannel sc, final int op) {
-		if (queuelock.tryLock()) {
-			try {
-				disableInterestNow(sc, op);
-			} finally {
-				queuelock.unlock();
-			}
-		} else {
+//		if (queuelock.tryLock()) {
+//			try {
+//				disableInterestNow(sc, op);
+//			} finally {
+//				queuelock.unlock();
+//			}
+//		} else {
 			disableInterestLater(sc, op);
-		}
+//		}
 	}
 
 	private final void disableInterestLater(final SelectableChannel sc, final int op) {
