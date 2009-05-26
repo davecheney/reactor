@@ -4,13 +4,9 @@ import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.log4j.Logger;
 
@@ -20,17 +16,11 @@ public final class ThreadPoolReactor extends Reactor {
 	private final ExecutorService executor;
 	private boolean running = false;
 	
-	private final Lock queuelock, selectorlock;
-
-	private final Queue<Runnable> pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
+	private final ConcurrentLinkedQueue<Runnable> pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
 
 	protected ThreadPoolReactor(final ExecutorService executor) throws IOException {
 		super();
 		this.executor = executor;
-		
-		ReadWriteLock l = new ReentrantReadWriteLock();
-		this.queuelock = l.readLock();
-		this.selectorlock = l.writeLock();
 	}
 
 	public static ThreadPoolReactor open(ExecutorService executor) throws IOException {
@@ -43,15 +33,7 @@ public final class ThreadPoolReactor extends Reactor {
 
 	@Override
 	protected <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
-//		if(queuelock.tryLock()) {
-//			try {
-//				registerNow(channel, ops, asyncChannel);
-//			} finally {
-//				queuelock.unlock();
-//			}
-//		} else {
-			registerLater(channel, ops, asyncChannel);
-//		}
+		registerLater(channel, ops, asyncChannel);
 	}
 	
 	@Override
@@ -78,15 +60,7 @@ public final class ThreadPoolReactor extends Reactor {
 	
 	@Override
 	protected final void enableInterest(final SelectableChannel sc, final int op) {
-//		if (queuelock.tryLock()) {
-//			try {
-//				enableInterestNow(sc, op);
-//			} finally {
-//				queuelock.unlock();
-//			}
-//		} else {
-			enableInterestLater(sc, op);
-//		}
+		enableInterestLater(sc, op);
 	}
 
 	private final void enableInterestLater(final SelectableChannel sc, final int op) {
@@ -99,15 +73,7 @@ public final class ThreadPoolReactor extends Reactor {
 	 
 	@Override
 	final void disableInterest(final SelectableChannel sc, final int op) {
-//		if (queuelock.tryLock()) {
-//			try {
-//				disableInterestNow(sc, op);
-//			} finally {
-//				queuelock.unlock();
-//			}
-//		} else {
-			disableInterestLater(sc, op);
-//		}
+		disableInterestLater(sc, op);
 	}
 
 	private final void disableInterestLater(final SelectableChannel sc, final int op) {
@@ -135,20 +101,11 @@ public final class ThreadPoolReactor extends Reactor {
 	@Override
 	public final void doSelect() throws IOException {
 		doPendingInvocations();
-		try {
-			// The selector lock has to be held during the whole of the doSelect() method 
-			// as the event handlers may try to change the interest set of a key which
-			// is in the pending queue to be registered, yet because the selectorlock
-			// is not held they are able to execute ahead of the registration
-			selectorlock.lock();
-			super.doSelect();
-		} finally {
-			selectorlock.unlock();
-		}
+		super.doSelect();
 	}
 	
 	private final void doPendingInvocations() {
-		for(Runnable r = pendingInvocations.poll(); r != null ; r = pendingInvocations.poll()) {
+		for(Runnable r : pendingInvocations) {
 			try {
 				r.run();
 			} catch (CancelledKeyException ignored) {
