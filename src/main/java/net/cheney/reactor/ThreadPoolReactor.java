@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,7 +19,7 @@ public final class ThreadPoolReactor extends Reactor {
 	private final ExecutorService executor;
 	private boolean running = false;
 	
-	private final ConcurrentLinkedQueue<Runnable> pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
+	private final BlockingQueue<Runnable> pendingInvocations = new ArrayBlockingQueue<Runnable>(1024);
 
 	protected ThreadPoolReactor(final ExecutorService executor) throws IOException {
 		super();
@@ -42,7 +45,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	private final <T extends SelectableChannel> void registerLater(final T channel, final int ops, final AsyncChannel<T> asyncChannel) {
-		invokeLater(new Runnable() {
+		class Register implements Runnable {
 			public void run() {
 				try {
 					registerNow(channel, ops, asyncChannel);
@@ -50,7 +53,8 @@ public final class ThreadPoolReactor extends Reactor {
 					LOG.error(String.format("Unable to register channel %s, with ops %d", channel, ops));
 				}
 			}
-		});
+		}
+		invokeLater(new Register());
 	}
 
 	private final void invokeLater(final Runnable r) {
@@ -64,11 +68,12 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	private final void enableInterestLater(final SelectableChannel sc, final int op) {
-		invokeLater(new Runnable() {
+		class EnableInterest implements Runnable {
 			public void run() {
 				enableInterestNow(sc, op); 
 			};
-		});
+		}
+		invokeLater(new EnableInterest());
 	}
 	 
 	@Override
@@ -77,11 +82,12 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	private final void disableInterestLater(final SelectableChannel sc, final int op) {
-		invokeLater(new Runnable() {
+		class DisableInterest implements Runnable {
 			public void run() {
 				disableInterestNow(sc, op);
 			};
-		});
+		}
+		invokeLater(new DisableInterest());
 	}
 
 	@Override
@@ -105,11 +111,15 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	private final void doPendingInvocations() {
-		for(Runnable r : pendingInvocations) {
+		final Collection<Runnable> tasks = new ArrayList<Runnable>();
+		pendingInvocations.drainTo(tasks);
+//		LOG.info("processing: "+tasks.size());
+		for(Runnable r : tasks) {
 			try {
+//				LOG.info(r.toString());
 				r.run();
 			} catch (CancelledKeyException ignored) {
-				//
+				LOG.warn("Unable to execute "+r.toString());
 			}
 		}
 	}
