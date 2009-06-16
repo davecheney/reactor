@@ -19,7 +19,7 @@ public final class ThreadPoolReactor extends Reactor {
 	private final ExecutorService executor;
 	private boolean running = false;
 	
-	private final BlockingQueue<Runnable> pendingInvocations = new ArrayBlockingQueue<Runnable>(1024);
+	private final BlockingQueue<Runnable> pendingOperations = new ArrayBlockingQueue<Runnable>(1024);
 
 	protected ThreadPoolReactor(final ExecutorService executor) throws IOException {
 		super();
@@ -58,7 +58,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 
 	private final void invokeLater(final Runnable r) {
-		pendingInvocations.add(r);
+		pendingOperations.add(r);
 		wakeup();
 	}
 	
@@ -112,7 +112,7 @@ public final class ThreadPoolReactor extends Reactor {
 	
 	private final void doPendingInvocations() {
 		final Collection<Runnable> tasks = new ArrayList<Runnable>();
-		pendingInvocations.drainTo(tasks);
+		pendingOperations.drainTo(tasks);
 //		LOG.info("processing: "+tasks.size());
 		for(Runnable r : tasks) {
 			try {
