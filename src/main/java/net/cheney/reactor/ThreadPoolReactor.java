@@ -26,12 +26,8 @@ public final class ThreadPoolReactor extends Reactor {
 		this.executor = executor;
 	}
 
-	public static ThreadPoolReactor open(ExecutorService executor) throws IOException {
-		return new ThreadPoolReactor(executor);
-	}
-
-	public static Reactor open() throws IOException {
-		return open(Executors.newCachedThreadPool());
+	public static ThreadPoolReactor open() throws IOException {
+		return new ThreadPoolReactor(Executors.newFixedThreadPool(10));
 	}
 
 	@Override
