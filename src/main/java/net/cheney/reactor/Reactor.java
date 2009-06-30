@@ -127,6 +127,7 @@ public abstract class Reactor {
 	}
 
 	final void enableInterestNow(final SelectableChannel sc, int ops) {
+		assert sc.isRegistered() : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		final SelectionKey sk = sc.keyFor(selector());
 		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		try {
@@ -137,6 +138,7 @@ public abstract class Reactor {
 	}
 
 	final void disableInterestNow(final SelectableChannel sc, int ops) {
+		assert sc.isRegistered() : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		final SelectionKey sk = sc.keyFor(selector());
 		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
 		try {
