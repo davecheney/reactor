@@ -133,21 +133,24 @@ public abstract class Reactor {
 			try {
 				sk.interestOps(sk.interestOps() | ops);
 			} catch (CancelledKeyException e) {
-				LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
+				LOG.error(String.format("Unable to enable ops %d on key %s, channel %s", ops, sk, sc));
 			}
 		} else {
-			LOG.warn("channel ["+sc+"] is closed");
+			LOG.warn(String.format("Unable to enable ops %d, channel %s", ops, sc));
 		}
 	}
 
 	final void disableInterestNow(final SelectableChannel sc, int ops) {
-		assert sc.isRegistered() : "channel ["+sc+"] is not registered with selector["+selector()+"]";
-		final SelectionKey sk = sc.keyFor(selector());
-		assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
-		try {
-			sk.interestOps(sk.interestOps() & ~ops);
-		} catch (CancelledKeyException e) {
-			LOG.error(String.format("Unable to set ops %d on key %s, channel %s", ops, sk, sc));
+		if (sc.isOpen()) {
+			final SelectionKey sk = sc.keyFor(selector());
+			assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
+			try {
+				sk.interestOps(sk.interestOps() & ~ops);
+			} catch (CancelledKeyException e) {
+				LOG.error(String.format("Unable to disable ops %d on key %s, channel %s", ops, sk, sc));
+			}
+		} else {
+			LOG.warn(String.format("Unable to disable ops %d, channel %s", ops, sc));
 		}
 	}
 	
