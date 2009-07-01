@@ -117,7 +117,7 @@ public abstract class Reactor {
 			break;
 
 		default:
-			LOG.error(String.format("Channel: %s [%s] interestOps: %d Unhandled readyOps: %d",key.channel(), key.attachment(), key.interestOps(), key.readyOps()));
+			LOG.error(String.format("Channel: %s [%s] interestOps: %s Unhandled readyOps: %s",key.channel(), key.attachment(), InterestOp.parse(key.interestOps()), InterestOp.parse(key.readyOps())));
 		}		
 	}
 
@@ -133,10 +133,10 @@ public abstract class Reactor {
 			try {
 				sk.interestOps(sk.interestOps() | ops);
 			} catch (CancelledKeyException e) {
-				LOG.error(String.format("Unable to enable ops %d on key %s, channel %s", ops, sk, sc));
+				LOG.error(String.format("Unable to enable ops %s on key %s, channel %s", InterestOp.parse(ops), sk, sc));
 			}
 		} else {
-			LOG.warn(String.format("Unable to enable ops %d, channel %s", ops, sc));
+			LOG.warn(String.format("Unable to enable ops %s, channel %s", InterestOp.parse(ops), sc));
 		}
 	}
 
@@ -147,10 +147,10 @@ public abstract class Reactor {
 			try {
 				sk.interestOps(sk.interestOps() & ~ops);
 			} catch (CancelledKeyException e) {
-				LOG.error(String.format("Unable to disable ops %d on key %s, channel %s", ops, sk, sc));
+				LOG.error(String.format("Unable to disable ops %s on key %s, channel %s", InterestOp.parse(ops), sk, sc));
 			}
 		} else {
-			LOG.warn(String.format("Unable to disable ops %d, channel %s", ops, sc));
+			LOG.warn(String.format("Unable to disable ops %s, channel %s", InterestOp.parse(ops), sc));
 		}
 	}
 	
