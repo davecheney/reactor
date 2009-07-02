@@ -24,7 +24,7 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 		return this.sc;
 	}
 	
-	final Reactor reactor() {
+	protected final Reactor reactor() {
 		return this.reactor;
 	}
 	

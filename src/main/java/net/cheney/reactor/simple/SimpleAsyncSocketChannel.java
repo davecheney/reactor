@@ -1,16 +1,22 @@
-package net.cheney.reactor;
+package net.cheney.reactor.simple;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import net.cheney.reactor.AsyncSocketChannel;
+import net.cheney.reactor.ClientProtocolFactory;
+import net.cheney.reactor.CompletionHandler;
+import net.cheney.reactor.EventHandler;
+import net.cheney.reactor.Reactor;
+
 public final class SimpleAsyncSocketChannel extends AsyncSocketChannel {
 
-	SimpleAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory) throws IOException {
+	protected SimpleAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory) throws IOException {
 		super(reactor, SocketChannel.open(), factory, 0);
 	}
 	
-	SimpleAsyncSocketChannel(final Reactor reactor, final SocketChannel sc) throws IOException {
+	protected SimpleAsyncSocketChannel(final Reactor reactor, final SocketChannel sc) throws IOException {
 		super(reactor, sc, null, 0);
 	}
 

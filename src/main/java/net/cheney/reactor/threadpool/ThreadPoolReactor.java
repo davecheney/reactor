@@ -1,4 +1,4 @@
-package net.cheney.reactor;
+package net.cheney.reactor.threadpool;
 
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
@@ -10,6 +10,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import net.cheney.reactor.AsyncChannel;
+import net.cheney.reactor.AsyncServerChannel;
+import net.cheney.reactor.AsyncSocketChannel;
+import net.cheney.reactor.ClientProtocolFactory;
+import net.cheney.reactor.Reactor;
+import net.cheney.reactor.ServerProtocolFactory;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +43,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	
 	@Override
-	AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException {
+	protected AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException {
 		return new ThreadPoolAsyncServerChannel(this, factory, executor);
 	}
 	
@@ -73,7 +80,7 @@ public final class ThreadPoolReactor extends Reactor {
 	}
 	 
 	@Override
-	final void disableInterest(final SelectableChannel sc, final int op) {
+	protected final void disableInterest(final SelectableChannel sc, final int op) {
 		disableInterestLater(sc, op);
 	}
 

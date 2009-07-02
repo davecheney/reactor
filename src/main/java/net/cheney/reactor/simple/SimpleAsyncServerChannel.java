@@ -1,7 +1,12 @@
-package net.cheney.reactor;
+package net.cheney.reactor.simple;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+
+import net.cheney.reactor.AsyncServerChannel;
+import net.cheney.reactor.AsyncSocketChannel;
+import net.cheney.reactor.Reactor;
+import net.cheney.reactor.ServerProtocolFactory;
 
 public class SimpleAsyncServerChannel extends AsyncServerChannel {
 	
@@ -10,7 +15,7 @@ public class SimpleAsyncServerChannel extends AsyncServerChannel {
 	}
 	
 	@Override
-	AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException {
+	protected AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException {
 		return new SimpleAsyncSocketChannel(reactor(), sc);
 	}
 	

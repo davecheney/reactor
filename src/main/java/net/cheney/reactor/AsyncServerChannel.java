@@ -19,7 +19,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 
 	private final ServerProtocolFactory factory;
 
-	AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
+	protected AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
 		super(reactor, createServerSocketChannel(), 0);
 		this.factory = factory;
 	}
@@ -56,7 +56,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 		socket.setTcpNoDelay(true);
 	}
 
-	abstract AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException;
+	protected abstract AsyncSocketChannel createAsyncSocketChannel(SocketChannel sc) throws IOException;
 
 	public final void enableAcceptInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_ACCEPT);

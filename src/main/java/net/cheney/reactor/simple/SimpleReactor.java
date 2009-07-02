@@ -1,9 +1,16 @@
-package net.cheney.reactor;
+package net.cheney.reactor.simple;
 
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import net.cheney.reactor.AsyncChannel;
+import net.cheney.reactor.AsyncServerChannel;
+import net.cheney.reactor.AsyncSocketChannel;
+import net.cheney.reactor.ClientProtocolFactory;
+import net.cheney.reactor.Reactor;
+import net.cheney.reactor.ServerProtocolFactory;
 
 public final class SimpleReactor extends Reactor {
 
@@ -18,29 +25,28 @@ public final class SimpleReactor extends Reactor {
 	}
 
 	@Override
-	final void disableInterest(final SelectableChannel sc, final int ops) {
+	protected final void disableInterest(final SelectableChannel sc, final int ops) {
 		disableInterestNow(sc, ops);
 	}
 
 	@Override
-	final void enableInterest(final SelectableChannel sc, final int ops) {
+	protected final void enableInterest(final SelectableChannel sc, final int ops) {
 		enableInterestNow(sc, ops);
 	}
 
 	@Override
-	final AsyncSocketChannel newAsyncSocketChannel(
+	protected final AsyncSocketChannel newAsyncSocketChannel(
 			final ClientProtocolFactory factory) throws IOException {
 		return new SimpleAsyncSocketChannel(this, factory);
 	}
 
 	@Override
-	final AsyncServerChannel newAsyncServerChannel(
-			final ServerProtocolFactory factory) throws IOException {
+	protected final AsyncServerChannel newAsyncServerChannel(final ServerProtocolFactory factory) throws IOException {
 		return new SimpleAsyncServerChannel(this, factory);
 	}
 
 	@Override
-	final <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException {
+	protected final <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException {
 		registerNow(channel, ops, asyncChannel);
 	}
 

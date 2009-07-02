@@ -36,19 +36,19 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 
 	public abstract void doRead() throws IOException;
 	
-	final void disableReadInterest() {
+	protected final void disableReadInterest() {
 		reactor().disableInterest(this, SelectionKey.OP_READ);
 	}
 
-	final void enableReadInterest() {
+	protected final void enableReadInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_READ);
 	}
 	
-	final void disableWriteInterest() {
+	protected final void disableWriteInterest() {
 		reactor().disableInterest(this, SelectionKey.OP_WRITE);
 	}
 	
-	final void enableWriteInterest() {
+	protected final void enableWriteInterest() {
 		reactor().enableInterest(this, SelectionKey.OP_WRITE);
 	}
 	

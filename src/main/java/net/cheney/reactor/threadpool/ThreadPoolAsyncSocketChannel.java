@@ -1,4 +1,4 @@
-package net.cheney.reactor;
+package net.cheney.reactor.threadpool;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,18 +8,24 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
+import net.cheney.reactor.AsyncSocketChannel;
+import net.cheney.reactor.ClientProtocolFactory;
+import net.cheney.reactor.CompletionHandler;
+import net.cheney.reactor.EventHandler;
+import net.cheney.reactor.Reactor;
+
 public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 
 	private final Queue<EventHandler<SocketChannel>> pendingReads = new ConcurrentLinkedQueue<EventHandler<SocketChannel>>();
 	private final Queue<EventHandler<SocketChannel>> pendingWrites = new ConcurrentLinkedQueue<EventHandler<SocketChannel>>();
 	private final ExecutorService executor;
 
-	ThreadPoolAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory, final ExecutorService executor) throws IOException {
+	protected ThreadPoolAsyncSocketChannel(final Reactor reactor, final ClientProtocolFactory factory, final ExecutorService executor) throws IOException {
 		super(reactor, SocketChannel.open(), factory, SelectionKey.OP_CONNECT);
 		this.executor = executor;
 	}
 
-	ThreadPoolAsyncSocketChannel(final Reactor reactor, final SocketChannel sc, final ExecutorService executor) throws IOException {
+	protected ThreadPoolAsyncSocketChannel(final Reactor reactor, final SocketChannel sc, final ExecutorService executor) throws IOException {
 		super(reactor, sc, null, 0);
 		this.executor = executor;
 	}

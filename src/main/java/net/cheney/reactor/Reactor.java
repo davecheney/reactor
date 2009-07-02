@@ -20,7 +20,7 @@ public abstract class Reactor {
 	
 	private final Selector selector;
 
-	Reactor() throws IOException {
+	protected Reactor() throws IOException {
 		selector = SelectorProvider.provider().openSelector();
 	}
 	
@@ -32,24 +32,24 @@ public abstract class Reactor {
 		enableInterest(channel.channel(), ops);
 	}
 	
-	abstract void enableInterest(final SelectableChannel sc, int ops);
+	protected abstract void enableInterest(final SelectableChannel sc, int ops);
 	
 	final void disableInterest(final AsyncChannel<?> channel, final int ops) {
 		disableInterest(channel.channel(), ops);
 	}
 
-	abstract void disableInterest(final SelectableChannel sc, int ops);
+	protected abstract void disableInterest(final SelectableChannel sc, int ops);
 	
-	abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
+	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
 	
-	abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException;
+	protected abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException;
 	
 	public final AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException {
 		final AsyncServerChannel channel = newAsyncServerChannel(factory);
 		return channel.listen(addr);
 	}
 	
-	abstract AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException;
+	protected abstract AsyncServerChannel newAsyncServerChannel(ServerProtocolFactory factory) throws IOException;
 
 	Set<SelectionKey> selectNow() throws IOException {
 		if (selector.select() > 0) {
@@ -64,7 +64,7 @@ public abstract class Reactor {
 		channel.connect(addr);
 	}
 	
-	final void wakeup() {
+	protected final void wakeup() {
 		selector.wakeup();
 	}
 
@@ -121,12 +121,12 @@ public abstract class Reactor {
 		}		
 	}
 
-	final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
+	protected final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
 		channel.register(selector(), ops, asyncChannel);
 		LOG.info(String.format("Channel [%s] now registered on [%s]", channel, selector()));
 	}
 
-	final void enableInterestNow(final SelectableChannel sc, int ops) {
+	protected final void enableInterestNow(final SelectableChannel sc, int ops) {
 		if (sc.isOpen()) {
 			final SelectionKey sk = sc.keyFor(selector());
 			assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
@@ -140,7 +140,7 @@ public abstract class Reactor {
 		}
 	}
 
-	final void disableInterestNow(final SelectableChannel sc, int ops) {
+	protected final void disableInterestNow(final SelectableChannel sc, int ops) {
 		if (sc.isOpen()) {
 			final SelectionKey sk = sc.keyFor(selector());
 			assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
