@@ -8,7 +8,7 @@
 	<version>0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:svn://svn.cheney.net/public/reactor/trunk
+		<connection>scm:svn:svn://svn.cheney.net/public/${project.name}/trunk
 		</connection>
 		<developerConnection>
 			${scm.connection}
@@ -59,19 +59,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<distributionManagement>
-		<!-- use the following if you're not using a snapshot version. -->
-		<repository>
-			<id>repo-cheney-net</id>
-			<url>scp://repo.cheney.net/export/sites/cheney.net/repo/htdocs/maven2</url>
-		</repository>
-		<!-- use the following if you ARE using a snapshot version. -->
-		<snapshotRepository>
-			<id>repo-cheney-net</id>
-			<url>scp://repo.cheney.net/export/sites/cheney.net/repo/htdocs/maven2</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -86,5 +73,22 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<properties>
+		<repoUrl>http://repo.cheney.net/maven2</repoUrl>
+		<releaseRepoUrl>${repoUrl}/public</releaseRepoUrl>
+		<snapshotRepoUrl>${repoUrl}/public-snapshot</snapshotRepoUrl>
+	</properties>
+
+	<distributionManagement>
+		<repository>
+			<id>public</id>
+			<url>dav:${releaseRepoUrl}</url>
+		</repository>
+		<snapshotRepository>
+			<id>public-snapshot</id>
+			<url>dav:${snapshotRepoUrl}</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>
