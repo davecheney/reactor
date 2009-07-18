@@ -18,24 +18,26 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 	private static final Logger LOG = Logger.getLogger(AsyncServerChannel.class);
 
 	private final ServerProtocolFactory factory;
+	
+	private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 65535;
 
 	protected AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
 		super(reactor, createServerSocketChannel(), 0);
 		this.factory = factory;
 	}
 	
-	protected AsyncServerChannel listen(final SocketAddress addr) throws IOException {
+	protected final AsyncServerChannel listen(final SocketAddress addr) throws IOException {
 		channel().socket().bind(addr);
 		enableAcceptInterest(); 
 		LOG.info(format("%s listening on %s", this, channel().socket()));
 		return this;
 	}
 	
-	final static ServerSocketChannel createServerSocketChannel() throws IOException {
+	static final ServerSocketChannel createServerSocketChannel() throws IOException {
 		final ServerSocketChannel ssc = SelectorProvider.provider().openServerSocketChannel();
 		final ServerSocket socket = ssc.socket();
 		socket.setReuseAddress(true);
-		socket.setReceiveBufferSize(65535);
+		socket.setReceiveBufferSize(DEFAULT_RECEIVE_BUFFER_SIZE);
 		return ssc;
 	}
 	
