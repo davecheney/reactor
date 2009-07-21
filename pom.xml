@@ -80,6 +80,21 @@
 		<snapshotRepoUrl>${repoUrl}/public-snapshot</snapshotRepoUrl>
 	</properties>
 
+	<ciManagement>
+		<system>hudson</system>
+		<url>http://hudson.cheney.net/job/net.cheney.reactor-TRUNK/</url>
+		<notifiers>
+			<notifier>
+				<type>mail</type>
+				<address>dave@cheney.net</address>
+				<sendOnError>true</sendOnError>
+				<sendOnFailure>true</sendOnFailure>
+				<sendOnSuccess>false</sendOnSuccess>
+				<sendOnWarning>false</sendOnWarning>
+			</notifier>
+		</notifiers>
+	</ciManagement>
+
 	<distributionManagement>
 		<repository>
 			<id>public</id>
