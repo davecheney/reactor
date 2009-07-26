@@ -1,5 +1,6 @@
 package net.cheney.reactor;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.CancelledKeyException;
@@ -15,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import static java.util.Collections.emptySet;
 
-public abstract class Reactor {
+public abstract class Reactor implements Closeable {
 	private static final Logger LOG = Logger.getLogger(Reactor.class);
 	
 	private final Selector selector;
@@ -157,5 +158,10 @@ public abstract class Reactor {
 	public abstract void start();
 	
 	public abstract void stop();
+	
+	@Override
+	public void close() throws IOException {
+		this.selector.close();
+	}
 	
 }
