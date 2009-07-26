@@ -2,14 +2,16 @@ package net.cheney.reactor.simple;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import net.cheney.reactor.AbstractReactorTestCase;
+import net.cheney.reactor.Reactor;
 
+public class SimpleReactorTest extends AbstractReactorTestCase {
 
-public class SimpleReactorTest {
-
-	@Test public void testCreateAndClose() throws IOException {
-		SimpleReactor reactor = SimpleReactor.open();
-		reactor.close();
+	@Override
+	protected Reactor openReactor() throws IOException {
+		return SimpleReactor.open();
 	}
+
+	
 }
 
