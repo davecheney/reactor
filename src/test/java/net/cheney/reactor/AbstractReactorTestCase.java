@@ -1,7 +1,6 @@
 package net.cheney.reactor;
 
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
 
 import org.junit.Test;
 
