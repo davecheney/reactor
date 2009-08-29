@@ -4,13 +4,13 @@
 	<groupId>net.cheney.reactor</groupId>
 	<artifactId>reactor</artifactId>
 	<name>reactor</name>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<scm>
-		<connection>scm:svn:svn://svn.cheney.net/public/reactor/tags/reactor-0.2
+		<connection>scm:svn:svn://svn.cheney.net/public/reactor/trunk
 		</connection>
 		<developerConnection>
-			scm:svn:svn://svn.cheney.net/public/reactor/tags/reactor-0.2
+			scm:svn:svn://svn.cheney.net/public/reactor/trunk
 		</developerConnection>
 	</scm>
 	<dependencies>
