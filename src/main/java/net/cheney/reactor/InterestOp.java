@@ -4,6 +4,8 @@ import java.nio.channels.SelectionKey;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+
 enum InterestOp {
 
 	ACCEPT(SelectionKey.OP_ACCEPT),
@@ -17,7 +19,7 @@ enum InterestOp {
 		this.op = op;
 	}
 	
-	static Set<InterestOp> parse(int o) {
+	static Set<InterestOp> parse(@Nonnegative int o) {
 		Set<InterestOp> ops = new HashSet<InterestOp>();
 		for(InterestOp value : values()) {
 			if ((o & value.op) == o) {

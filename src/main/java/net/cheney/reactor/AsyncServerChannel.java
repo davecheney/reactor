@@ -12,6 +12,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
+import javax.annotation.Nonnull;
+
 import org.apache.log4j.Logger;
 
 public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChannel> {
@@ -21,12 +23,12 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 	
 	private static final int DEFAULT_RECEIVE_BUFFER_SIZE = 65535;
 
-	protected AsyncServerChannel(final Reactor reactor, final ServerProtocolFactory factory) throws IOException {
+	protected AsyncServerChannel(@Nonnull Reactor reactor, @Nonnull ServerProtocolFactory factory) throws IOException {
 		super(reactor, createServerSocketChannel(), 0);
 		this.factory = factory;
 	}
 	
-	protected final AsyncServerChannel listen(final SocketAddress addr) throws IOException {
+	protected final AsyncServerChannel listen(@Nonnull SocketAddress addr) throws IOException {
 		channel().socket().bind(addr);
 		enableAcceptInterest(); 
 		LOG.info(format("%s listening on %s", this, channel().socket()));
@@ -53,7 +55,7 @@ public abstract class AsyncServerChannel extends AsyncChannel<ServerSocketChanne
 		}		
 	}
 	
-	private final void setSocketParameters(final Socket socket) throws SocketException {
+	private final void setSocketParameters(@Nonnull Socket socket) throws SocketException {
 		socket.setSendBufferSize(65535);
 		socket.setTcpNoDelay(true);
 	}

@@ -4,12 +4,15 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.channels.SelectableChannel;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 public abstract class AsyncChannel<T extends SelectableChannel> implements Closeable {
 	
 	private final T sc;
 	private final Reactor reactor;
 
-	AsyncChannel(final Reactor reactor, final T sc, final int ops) throws IOException {
+	AsyncChannel(@Nonnull Reactor reactor, @Nonnull T sc, @Nonnegative int ops) throws IOException {
 		this.sc = sc;
 		this.reactor = reactor;
 		sc.configureBlocking(false);
@@ -28,5 +31,8 @@ public abstract class AsyncChannel<T extends SelectableChannel> implements Close
 		return this.reactor;
 	}
 	
-
+	@Override
+	public final String toString() {
+		return super.toString()+"["+channel()+"]";
+	}
 }

@@ -2,11 +2,13 @@ package net.cheney.reactor;
 
 import java.io.IOException;
 
+import javax.annotation.Nonnull;
+
 public abstract class Protocol<T extends AsyncByteChannel<?>> {
 
 	private final T channel;
 	
-	protected Protocol(final T channel) {
+	protected Protocol(@Nonnull T channel) {
 		this.channel = channel;
 	}
 	

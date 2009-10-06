@@ -6,6 +6,9 @@ import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import org.apache.log4j.Logger;
 
 public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel> {
@@ -13,7 +16,7 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 	
 	private final ClientProtocolFactory factory;
 
-	protected AsyncSocketChannel(final Reactor reactor, final SocketChannel channel, final ClientProtocolFactory factory, final int ops) throws IOException {
+	protected AsyncSocketChannel(@Nonnull Reactor reactor, @Nonnull SocketChannel channel, @Nonnull ClientProtocolFactory factory, @Nonnegative int ops) throws IOException {
 		super(reactor, channel, ops);
 		this.factory = factory;
 	}
@@ -47,7 +50,7 @@ public abstract class AsyncSocketChannel extends AsyncByteChannel<SocketChannel>
 		}
 	}
 
-	final void connect(final SocketAddress addr) throws IOException {
+	final void connect(@Nonnull SocketAddress addr) throws IOException {
 		channel().connect(addr);
 //		enableConnectInterest();
 	}

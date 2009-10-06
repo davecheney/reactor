@@ -6,6 +6,8 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 
+import javax.annotation.Nonnull;
+
 public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel> extends AsyncChannel<T> {
 
 	private static final CompletionHandler<ByteBuffer[]> NULL_WRITE_HANDLER = new CompletionHandler<ByteBuffer[]>() {
@@ -14,21 +16,21 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 		};
 	};
 	
-	AsyncByteChannel(final Reactor reactor, final T channel, final int ops) throws IOException {
+	AsyncByteChannel(@Nonnull Reactor reactor, @Nonnull T channel, @Nonnull int ops) throws IOException {
 		super(reactor, channel, ops);
 	}
 
-	public abstract void read(final ByteBuffer buff, final CompletionHandler<ByteBuffer> handler);
+	public abstract void read(ByteBuffer buff, CompletionHandler<ByteBuffer> handler);
 	
 	public abstract void read(EventHandler<T> eventHandler);
 	
-	public abstract void write(final ByteBuffer buff, final CompletionHandler<ByteBuffer> handler); 
+	public abstract void write(ByteBuffer buff, CompletionHandler<ByteBuffer> handler); 
 	
-	public abstract void write(final ByteBuffer[] buffs, final CompletionHandler<ByteBuffer[]> handler);
+	public abstract void write(ByteBuffer[] buffs, CompletionHandler<ByteBuffer[]> handler);
 	
 	public abstract void write(EventHandler<T> eventHandler);
 	
-	public final void write(final ByteBuffer... buffers) {
+	public final void write(@Nonnull ByteBuffer... buffers) {
 		write(buffers, NULL_WRITE_HANDLER);
 	}
 	
@@ -52,8 +54,4 @@ public abstract class AsyncByteChannel<T extends SelectableChannel & ByteChannel
 		reactor().enableInterest(this, SelectionKey.OP_WRITE);
 	}
 	
-	@Override
-	public final String toString() {
-		return super.toString()+"["+channel()+"]";
-	}
 }

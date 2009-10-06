@@ -12,6 +12,9 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import org.apache.log4j.Logger;
 
 import static java.util.Collections.emptySet;
@@ -29,23 +32,23 @@ public abstract class Reactor implements Closeable {
 		return selector;
 	}
 	
-	final void enableInterest(final AsyncChannel<?> channel, final int ops) {
+	final void enableInterest(@Nonnull AsyncChannel<?> channel, @Nonnegative int ops) {
 		enableInterest(channel.channel(), ops);
 	}
 	
-	protected abstract void enableInterest(final SelectableChannel sc, int ops);
+	protected abstract void enableInterest(SelectableChannel sc, int ops);
 	
-	final void disableInterest(final AsyncChannel<?> channel, final int ops) {
+	final void disableInterest(@Nonnull AsyncChannel<?> channel, @Nonnegative int ops) {
 		disableInterest(channel.channel(), ops);
 	}
 
-	protected abstract void disableInterest(final SelectableChannel sc, int ops);
+	protected abstract void disableInterest(SelectableChannel sc, int ops);
 	
-	protected abstract AsyncSocketChannel newAsyncSocketChannel(final ClientProtocolFactory factory) throws IOException;
+	protected abstract AsyncSocketChannel newAsyncSocketChannel(ClientProtocolFactory factory) throws IOException;
 	
-	protected abstract <T extends SelectableChannel> void register(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws IOException;
+	protected abstract <T extends SelectableChannel> void register(T channel, int ops, AsyncChannel<T> asyncChannel) throws IOException;
 	
-	public final AsyncServerChannel listenTCP(final SocketAddress addr, final ServerProtocolFactory factory) throws IOException {
+	public final AsyncServerChannel listenTCP(@Nonnull SocketAddress addr, @Nonnull ServerProtocolFactory factory) throws IOException {
 		final AsyncServerChannel channel = newAsyncServerChannel(factory);
 		return channel.listen(addr);
 	}
@@ -60,7 +63,7 @@ public abstract class Reactor implements Closeable {
 		}
 	}
 
-	public final void connect(final SocketAddress addr, final ClientProtocolFactory factory) throws IOException {
+	public final void connect(@Nonnull SocketAddress addr, @Nonnull ClientProtocolFactory factory) throws IOException {
 		final AsyncSocketChannel channel = newAsyncSocketChannel(factory);
 		channel.connect(addr);
 	}
@@ -92,7 +95,7 @@ public abstract class Reactor implements Closeable {
 		keys.clear();
 	}
 
-	private final void handleSelectionKey(final SelectionKey key) throws IOException {
+	private final void handleSelectionKey(@Nonnull SelectionKey key) throws IOException {
 		switch (key.readyOps()) {
 		case SelectionKey.OP_READ:
 			((AsyncByteChannel<?>) key.attachment()).doRead();
@@ -122,12 +125,12 @@ public abstract class Reactor implements Closeable {
 		}		
 	}
 
-	protected final <T extends SelectableChannel> void registerNow(final T channel, final int ops, final AsyncChannel<T> asyncChannel) throws ClosedChannelException {
+	protected final <T extends SelectableChannel> void registerNow(@Nonnull T channel, @Nonnegative int ops, @Nonnull AsyncChannel<T> asyncChannel) throws ClosedChannelException {
 		channel.register(selector(), ops, asyncChannel);
 		LOG.info(String.format("Channel [%s] now registered on [%s]", channel, selector()));
 	}
 
-	protected final void enableInterestNow(final SelectableChannel sc, int ops) {
+	protected final void enableInterestNow(@Nonnull SelectableChannel sc, @Nonnegative int ops) {
 		if (sc.isOpen()) {
 			final SelectionKey sk = sc.keyFor(selector());
 			assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
@@ -141,7 +144,7 @@ public abstract class Reactor implements Closeable {
 		}
 	}
 
-	protected final void disableInterestNow(final SelectableChannel sc, int ops) {
+	protected final void disableInterestNow(@Nonnull SelectableChannel sc, @Nonnegative int ops) {
 		if (sc.isOpen()) {
 			final SelectionKey sk = sc.keyFor(selector());
 			assert sk != null : "channel ["+sc+"] is not registered with selector["+selector()+"]";
