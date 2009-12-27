@@ -35,6 +35,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 		for (EventHandler<SocketChannel> handler = pendingReads.peek(); handler != null; handler = pendingReads.peek()) {
 			if (handler.handleEvent(channel())) {
 				pendingReads.remove(handler);
+				handler.complete();
 			} else {
 				return;
 			}
@@ -64,9 +65,13 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 					return false;
 
 				default:
-					executor.execute(readEventCompletedHandler);
 					return true;
 				}
+			}
+			
+			@Override
+			public void complete() {
+				executor.execute(readEventCompletedHandler);
 			}
 		}
 		
@@ -85,6 +90,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 				.peek()) {
 			if (handler.handleEvent(channel())) {
 				pendingWrites.remove(handler);
+				handler.complete();
 			} else {
 				return;
 			}
@@ -108,12 +114,14 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			
 			public final boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buff);
-				if (!buff.hasRemaining()) {
-					executor.execute(writeEventCompletedHandler);
-					return true;
-				} 
-				return false;
+				return !buff.hasRemaining();
 			}
+
+			@Override
+			public void complete() {
+				executor.execute(writeEventCompletedHandler);				
+			}
+			
 		}
 		
 		write(new WriteEventHandler());
@@ -135,12 +143,15 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 			
 			public final boolean handleEvent(final SocketChannel channel) throws IOException {
 				channel.write(buffs, 0, buffs.length);
-				if (!buffs[buffs.length - 1].hasRemaining()) {
-					executor.execute(writeEventCompletedHandler);
-					return true;
-				} 
-				return false;
+				return !buffs[buffs.length - 1].hasRemaining();
+
 			}
+
+			@Override
+			public void complete() {
+				executor.execute(writeEventCompletedHandler);
+			}
+			
 		}
 		
 		write(new WriteEventHandler());

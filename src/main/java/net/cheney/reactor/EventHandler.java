@@ -5,5 +5,7 @@ import java.nio.channels.SelectableChannel;
 
 public interface EventHandler<T extends SelectableChannel> {
 
-	boolean handleEvent(final T channel) throws IOException;	
+	boolean handleEvent(final T channel) throws IOException;
+	
+	void complete();
 }
