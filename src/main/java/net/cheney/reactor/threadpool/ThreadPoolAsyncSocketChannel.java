@@ -86,8 +86,7 @@ public final class ThreadPoolAsyncSocketChannel extends AsyncSocketChannel {
 
 	@Override
 	public final void doWrite() throws IOException {
-		for (EventHandler<SocketChannel> handler = pendingWrites.peek(); handler != null; handler = pendingWrites
-				.peek()) {
+		for (EventHandler<SocketChannel> handler = pendingWrites.peek(); handler != null; handler = pendingWrites.peek()) {
 			if (handler.handleEvent(channel())) {
 				pendingWrites.remove(handler);
 				handler.complete();
